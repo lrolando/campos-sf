@@ -22,6 +22,9 @@ Opciones extra por sitio (todas opcionales):
 - `quitar`: selectores que se borran de la tarjeta antes de leerla (p. ej. un código de aviso dentro del precio).
 - `solo_si` / `excluir_si`: regex sobre el texto de la tarjeta / el título (p. ej. `"en venta"`, `"vendido"`).
 - `ubicacion_regex`, `ubicacion_fija`, `zona: "ultima"`: cómo sacar la localidad.
+- `ubicacion_sin`: selector cuyo texto se le quita a la ubicación (p. ej. la dirección dentro del texto de la foto).
+- `ubicacion_defecto`: localidad que se usa si la ubicación no nombra ninguna (inmobiliarias de Rafaela que solo ponen el barrio).
+- `link` acepta `"selector@atributo"` (p. ej. `"[data-url]@data-url"`); `precio_regex` busca el precio en el texto de la tarjeta.
 - `tipo` = `"todos"` + `tipo_regex` (sobre el título) o `detalle.tipo_regex`: el tipo se saca de cada aviso.
 - `detalle`: entra a la página de cada aviso y saca `precio_regex` / `tipo_regex` de su texto.
 - `pagina_url`: paginación por número (`{url}`, `{n}`); se corta en la primera página vacía o 404.
@@ -30,7 +33,8 @@ Opciones extra por sitio (todas opcionales):
 - `api: "gaggiotti"`: Gaggiotti arma su web con JavaScript; se lee la API de búsqueda que usa su propio sitio
   (solo lectura). `tipos_api` mapea los códigos de tipo de esa API a campo/casa.
 
-Plantillas listas para copiar en `config.json`: **Tokko Broker** (bloques de Avantix / Propiedades Rafaela),
+Plantillas listas para copiar en `config.json`: **Tokko Broker** (bloques de Avantix / Trovare / Medran; la
+plantilla nueva de Tokko, con tarjetas `div[prop-id]`, está en Heima / Trivelli-Cremieux),
 **Pixel Inmobiliario** (Walker / Del Lago / Rubiolo: cambia `user_id` y `type`) y **WordPress Houzez** (Meyer).
 
 ## Qué hace el script con los datos

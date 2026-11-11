@@ -37,6 +37,9 @@ DEPARTAMENTOS = {norm(d): d for d in CFG["departamentos"]}
 
 
 def departamento_de(texto):
+    # Los barrios no cuentan como localidad: "B° Sarmiento" o "Barrio San Martín" son de una ciudad,
+    # no el pueblo de Sarmiento. Se quita desde "Barrio"/"B°"/"B." hasta el próximo separador.
+    texto = re.sub(r"(?i)(?<!\w)(?:barrio|b°|bº|b\.)\s*[^,|–\-]*", " ", texto or "")
     t = " " + re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", norm(texto))) + " "
     for loc in LOCALIDADES_ORDEN:
         if f" {loc} " in t:
@@ -52,7 +55,7 @@ def departamento_de(texto):
 
 def parse_precio(txt):
     txt = txt or ""
-    moneda = "USD" if re.search(r"USD|U\$S|US\$", txt, re.I) else "ARS"
+    moneda = "USD" if re.search(r"USD|U\$[SD]|US\$", txt, re.I) else "ARS"
     m = re.search(r"(\d[\d\.\,]*)", txt)
     if not m:
         return None, moneda
@@ -196,8 +199,11 @@ def leer_tarjeta(site, it, url):
     """Arma el aviso crudo de una tarjeta del listado, o None si hay que descartarla."""
     for basura in it.select(site["quitar"]) if site.get("quitar") else []:
         basura.decompose()  # p. ej. el código del aviso dentro del recuadro del precio
-    a = it.select_one(site["link"]) if site.get("link") else it.find("a", href=True)
-    if not a or not a.get("href"):
+    # "selector@atributo": el enlace está en otro atributo (p. ej. "[data-url]@data-url")
+    link_css, _, link_attr = (site.get("link") or "a[href]").partition("@")
+    link_attr = link_attr or "href"
+    a = it.select_one(link_css)
+    if not a or not a.get(link_attr):
         return None
     texto = " ".join(it.get_text(" ", strip=True).split())
     if site.get("solo_si") and not re.search(site["solo_si"], texto, re.I):
@@ -206,12 +212,18 @@ def leer_tarjeta(site, it, url):
     if site.get("excluir_si") and re.search(site["excluir_si"], titulo, re.I):
         return None  # p. ej. "VENDIDO" en el título
     ubicacion = site.get("ubicacion_fija") or sel_text(it, site.get("ubicacion"))
+    if site.get("ubicacion_sin"):  # se le quita el texto de otro elemento (p. ej. la dirección)
+        sacar = sel_text(it, site["ubicacion_sin"])
+        if sacar:
+            ubicacion = " ".join(ubicacion.replace(sacar, " ").split())
     if site.get("ubicacion_regex"):
         ubicacion = grupo(site["ubicacion_regex"], ubicacion) or ubicacion
-    href = urljoin(url, a["href"]).split("#")[0]
+    href = urljoin(url, a[link_attr]).split("#")[0]
+    precio_txt = sel_text(it, site.get("precio"))
+    if site.get("precio_regex"):  # el precio se busca en el texto de la tarjeta
+        precio_txt = grupo(site["precio_regex"], texto) or ""
     raw = {"url": href if site.get("conservar_query") else href.split("?")[0],
-           "titulo": titulo, "ubicacion": ubicacion,
-           "precio_txt": sel_text(it, site.get("precio")), "texto": texto}
+           "titulo": titulo, "ubicacion": ubicacion, "precio_txt": precio_txt, "texto": texto}
     if site.get("tipo_regex"):  # el tipo sale del título ("Mitre 4050 | Casa en Venta")
         raw["tipo"] = tipo_de_texto(grupo(site["tipo_regex"], titulo) or "")
         if not raw["tipo"]:
@@ -335,11 +347,14 @@ def zona_de(ubicacion, modo=None):
 
 def construir(site, raw):
     tipo = tipo_real(raw.get("tipo") or site["tipo"], raw["url"], raw["titulo"])
-    if not tipo or not permitido(tipo, raw["ubicacion"], raw["titulo"]):
-        return None
-    zona = zona_de(raw["ubicacion"], site.get("zona"))
+    ubicacion = raw["ubicacion"]
+    zona = zona_de(ubicacion, site.get("zona"))
     depto, loc = departamento_de(zona if zona.strip() else raw["titulo"])
-    if not depto:
+    if not depto and site.get("ubicacion_defecto"):
+        # Inmobiliarias que no nombran su propia ciudad ("San Lorenzo 1061 | B° Pizzurno" es de Rafaela)
+        ubicacion = site["ubicacion_defecto"]
+        depto, loc = departamento_de(ubicacion)
+    if not depto or not permitido(tipo, ubicacion, raw["titulo"]):
         return None
     precio, moneda = parse_precio(raw["precio_txt"])
     return {
