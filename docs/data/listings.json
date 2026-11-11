@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-11T11:11",
+ "actualizado": "2026-11-11T11:44",
  "fuentes": [
   {
    "fuente": "Mercado Libre",
@@ -60,16 +60,16 @@
   {
    "fuente": "Walker Inmobiliaria",
    "tipo": "casa",
-   "leidos": 3,
-   "en_zona": 3,
-   "errores": 0
+   "leidos": 0,
+   "en_zona": 0,
+   "errores": 1
   },
   {
    "fuente": "Rubiolo Inmobiliaria",
    "tipo": "campo",
-   "leidos": 1,
+   "leidos": 0,
    "en_zona": 0,
-   "errores": 0
+   "errores": 1
   },
   {
    "fuente": "Meyer Inmobiliaria",
