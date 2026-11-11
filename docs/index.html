@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campos y casas · Centro-oeste de Santa Fe</title>
+<meta name="description" content="Campos y casas en venta en Castellanos, Las Colonias, San Cristóbal y San Jerónimo, actualizado todos los días.">
+<style>
+:root{--bg:#eef1ea;--surface:#fbfcf9;--ink:#1c2a21;--muted:#5c6b60;--line:#cfd7c8;--green:#2f6b3f;--gold:#8a6612;--blue:#27567a;--red:#a23b2a}
+@media (prefers-color-scheme:dark){:root{--bg:#141b16;--surface:#1c261f;--ink:#e6ece5;--muted:#9aa89d;--line:#2f3d33;--green:#7fc08f;--gold:#e0b64d;--blue:#7fb0d6;--red:#e88a78}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Iowan Old Style","Palatino Linotype",Georgia,serif}
+header,main,footer{max-width:980px;margin:0 auto;padding:0 18px}
+header{padding-top:36px}
+h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 22px}
+.sans{font-family:system-ui,sans-serif}
+.filtros{display:flex;flex-wrap:wrap;gap:10px;padding:14px 0;border-top:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.9rem}
+.filtros+.filtros{border-top:0;padding-top:0}
+.filtros:last-of-type{border-bottom:1px solid var(--line)}
+.filtros input,.filtros select,.filtros button{padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;min-width:0}
+.filtros input[type=search]{flex:1 1 220px}
+.filtros input[type=number]{width:9.5em}
+.filtros button{cursor:pointer;color:var(--muted)}
+.filtros button:hover{color:var(--ink)}
+.filtros label{display:flex;align-items:center;gap:6px}
+.resumen{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:system-ui,sans-serif;color:var(--muted);font-size:.85rem;margin:14px 0}
+.resumen b{color:var(--ink);font-weight:600}
+.aviso{display:grid;grid-template-columns:1fr auto;gap:4px 18px;padding:16px 0;border-bottom:1px solid var(--line)}
+.aviso.inactivo{opacity:.65}
+.aviso h2{font-size:1.1rem;margin:0}
+.aviso h2 a{color:var(--ink);text-decoration:none}
+.aviso h2 a:hover{text-decoration:underline}
+.meta{color:var(--muted);font-family:system-ui,sans-serif;font-size:.85rem}
+.hist{color:var(--muted);font-family:system-ui,sans-serif;font-size:.8rem}
+.precio{font-size:1.25rem;font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.precio small{display:block;font-size:.8rem;font-weight:400;font-family:system-ui,sans-serif;color:var(--muted)}
+.precio .na{color:var(--muted);font-weight:400;font-size:1rem}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font:600 .75rem system-ui,sans-serif;margin-right:6px;border:1px solid currentColor;vertical-align:2px}
+.nuevo{color:var(--green)}.baja{color:var(--blue)}.sube{color:var(--red)}.off{color:var(--gold)}
+.ver{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--green)}
+.vacio{padding:40px 0;color:var(--muted)}
+#mas{display:block;margin:20px auto;padding:10px 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:.9rem system-ui,sans-serif;cursor:pointer}
+footer{padding:28px 18px 40px;color:var(--muted);font:.8rem/1.6 system-ui,sans-serif}
+.err{color:var(--red)}
+a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media(max-width:560px){.aviso{grid-template-columns:1fr}.precio{text-align:left}.filtros select,.filtros input[type=number]{flex:1 1 45%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Campos y casas en venta</h1>
+  <p class="sub">Castellanos, Las Colonias, San Cristóbal y San Jerónimo. <span id="act"></span></p>
+  <div class="filtros">
+    <input id="q" type="search" placeholder="Buscar por localidad o palabra" aria-label="Buscar">
+    <select id="tipo" aria-label="Tipo"><option value="">Campos y casas</option><option value="campo">Campos</option><option value="casa">Casas</option></select>
+    <select id="depto" aria-label="Departamento"><option value="">Todos los departamentos</option></select>
+    <select id="fuente" aria-label="Fuente"><option value="">Todas las fuentes</option></select>
+    <select id="orden" aria-label="Orden">
+      <option value="nuevo">Más recientes</option>
+      <option value="precio">Menor precio</option>
+      <option value="precio_desc">Mayor precio</option>
+      <option value="ha">Más hectáreas</option>
+      <option value="usdha">Menor USD por ha</option>
+    </select>
+  </div>
+  <div class="filtros">
+    <input id="pmax" type="number" min="0" step="1000" inputmode="numeric" placeholder="Precio máx. USD" aria-label="Precio máximo en dólares">
+    <input id="hamin" type="number" min="0" step="1" inputmode="numeric" placeholder="Mín. hectáreas" aria-label="Hectáreas mínimas">
+    <label><input id="soloNuevos" type="checkbox"> Nuevos (7 días)</label>
+    <label><input id="conBajas" type="checkbox"> Bajaron de precio</label>
+    <label><input id="conPrecio" type="checkbox"> Con precio</label>
+    <label><input id="verBajas" type="checkbox"> Incluir dados de baja</label>
+    <button id="limpiar" type="button">Limpiar filtros</button>
+  </div>
+</header>
+<main>
+  <div class="resumen" id="resumen" aria-live="polite"></div>
+  <div id="lista"></div>
+  <button id="mas" type="button" hidden>Mostrar más</button>
+</main>
+<footer id="pie"></footer>
+<script>
+const $=id=>document.getElementById(id);
+const CAMPOS=["q","tipo","depto","fuente","orden","pmax","hamin","soloNuevos","conBajas","conPrecio","verBajas"];
+const PAGINA=50;
+let DATA=[],mostrar=PAGINA;
+const num=n=>n.toLocaleString("es-AR",{maximumFractionDigits:1});
+const fmt=(n,m)=>n==null?null:(m==="USD"?"USD ":"$ ")+num(n);
+const dias=f=>Math.floor((Date.now()-new Date(f+"T00:00:00"))/864e5);
+const fecha=f=>f.split("-").reverse().join("/");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const usdHa=a=>a.precio&&a.hectareas&&a.moneda==="USD"?a.precio/a.hectareas:null;
+const bajo=a=>a.precio_anterior&&a.precio&&a.precio<a.precio_anterior;
+const mediana=v=>{if(!v.length)return null;v=[...v].sort((a,b)=>a-b);const m=v.length>>1;return v.length%2?v[m]:(v[m-1]+v[m])/2};
+// Precios sin dólares quedan al final: no hay tipo de cambio para compararlos con los de USD.
+const clavePrecio=a=>a.precio==null?Infinity:a.moneda==="USD"?a.precio:1e15+a.precio;
+
+function val(id){const e=$(id);return e.type==="checkbox"?e.checked:e.value}
+function setVal(id,v){const e=$(id);e.type==="checkbox"?e.checked=v==="1":e.value=v}
+
+function guardarURL(){
+  const p=new URLSearchParams();
+  CAMPOS.forEach(id=>{const v=val(id);if(v===true)p.set(id,"1");else if(v&&v!==false&&!(id==="orden"&&v==="nuevo"))p.set(id,v)});
+  const s=p.toString();
+  history.replaceState(null,"",s?"?"+s:location.pathname);
+}
+function leerURL(){
+  const p=new URLSearchParams(location.search);
+  CAMPOS.forEach(id=>{if(p.has(id))setVal(id,p.get(id))});
+}
+
+function filtrar(){
+  const q=norm(val("q")).split(/\s+/).filter(Boolean),t=val("tipo"),d=val("depto"),f=val("fuente");
+  const pmax=+val("pmax")||0,hamin=+val("hamin")||0;
+  return DATA.filter(a=>(!t||a.tipo===t)&&(!d||a.departamento===d)&&(!f||a.fuente===f)
+    &&(val("verBajas")||a.activo)
+    &&(!q.length||q.every(w=>a._txt.includes(w)))
+    &&(!val("soloNuevos")||dias(a.primera_vez)<=7)
+    &&(!val("conBajas")||bajo(a))
+    &&(!val("conPrecio")||a.precio!=null)
+    &&(!pmax||(a.precio!=null&&a.moneda==="USD"&&a.precio<=pmax))
+    &&(!hamin||(a.hectareas||0)>=hamin));
+}
+
+function ordenar(r){
+  const o=val("orden");
+  const k={precio:a=>clavePrecio(a),precio_desc:a=>a.precio==null?Infinity:(a.moneda==="USD"?0:1e15)-a.precio,
+    ha:a=>-(a.hectareas??-1),usdha:a=>usdHa(a)??Infinity}[o];
+  return r.sort(k?(a,b)=>k(a)-k(b)||b.primera_vez.localeCompare(a.primera_vez):(a,b)=>b.primera_vez.localeCompare(a.primera_vez));
+}
+
+function tarjeta(a){
+  const tags=[];
+  if(dias(a.primera_vez)<=7)tags.push('<span class="tag nuevo">Nuevo</span>');
+  if(bajo(a))tags.push(`<span class="tag baja">Bajó ${Math.round((1-a.precio/a.precio_anterior)*100)}%</span>`);
+  else if(a.precio_anterior&&a.precio>a.precio_anterior)tags.push('<span class="tag sube">Subió</span>');
+  if(!a.activo)tags.push(`<span class="tag off">Dado de baja · visto por última vez el ${fecha(a.ultima_vez)}</span>`);
+  const h=(a.historial||[]).filter(x=>x.precio!=null);
+  const hist=h.length>1?`<div class="hist">Historial: ${h.map(x=>esc(fmt(x.precio,x.moneda))+" ("+fecha(x.fecha)+")").join(" → ")}</div>`:"";
+  const p=fmt(a.precio,a.moneda),uh=usdHa(a);
+  const meta=[esc(a.ubicacion),esc(a.departamento),a.hectareas?num(a.hectareas)+" ha":"",
+    a.tipo==="campo"?"Campo":"Casa","visto desde el "+fecha(a.primera_vez)].filter(Boolean).join(" · ");
+  return `<article class="aviso${a.activo?"":" inactivo"}"><div><h2>${tags.join("")}<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.titulo)}</a></h2>
+    <div class="meta">${meta}</div>${hist}
+    <a class="ver" href="${esc(a.url)}" target="_blank" rel="noopener">Ver publicación en ${esc(a.fuente)} ↗</a></div>
+    <div class="precio">${p?esc(p):'<span class="na">Consultar</span>'}${bajo(a)?`<small><s>${esc(fmt(a.precio_anterior,a.moneda))}</s></small>`:""}${uh?"<small>USD "+Math.round(uh).toLocaleString("es-AR")+" por ha</small>":""}</div></article>`;
+}
+
+function render(reiniciar=true){
+  if(reiniciar)mostrar=PAGINA;
+  guardarURL();
+  const r=ordenar(filtrar());
+  const usd=r.filter(a=>a.precio!=null&&a.moneda==="USD").map(a=>a.precio);
+  const uh=r.map(usdHa).filter(x=>x!=null);
+  const ha=r.map(a=>a.hectareas).filter(Boolean);
+  const res=[`<span><b>${r.length}</b> ${r.length===1?"publicación":"publicaciones"}</span>`];
+  if(usd.length)res.push(`<span>Precio mediano <b>USD ${Math.round(mediana(usd)).toLocaleString("es-AR")}</b></span>`);
+  if(uh.length)res.push(`<span>Mediana por ha <b>USD ${Math.round(mediana(uh)).toLocaleString("es-AR")}</b></span>`);
+  if(ha.length)res.push(`<span><b>${num(ha.reduce((s,x)=>s+x,0))}</b> ha en total</span>`);
+  $("resumen").innerHTML=res.join("");
+  $("lista").innerHTML=r.length?r.slice(0,mostrar).map(tarjeta).join(""):'<p class="vacio">No hay publicaciones con estos filtros.</p>';
+  $("mas").hidden=r.length<=mostrar;
+  $("mas").textContent=`Mostrar más (${r.length-mostrar} restantes)`;
+}
+
+fetch("data/listings.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw r;return r.json()}).then(j=>{
+  DATA=j.avisos.map(a=>({...a,_txt:norm(a.titulo+" "+a.ubicacion+" "+a.departamento)}));
+  $("act").textContent="Actualizado el "+new Date(j.actualizado).toLocaleString("es-AR",{dateStyle:"long",timeStyle:"short"})+".";
+  [...new Set(DATA.map(a=>a.departamento))].sort().forEach(x=>$("depto").add(new Option(x,x)));
+  [...new Set(DATA.map(a=>a.fuente))].sort().forEach(x=>$("fuente").add(new Option(x,x)));
+  const activos=DATA.filter(a=>a.activo).length;
+  const fuentes=(j.fuentes||[]).map(f=>`${esc(f.fuente)} (${esc(f.tipo)}): ${f.en_zona} en la zona de ${f.leidos} leídos`+(f.errores||!f.leidos?' <span class="err">· con problemas</span>':"")).join("<br>");
+  $("pie").innerHTML=`${activos} avisos activos de ${DATA.length} registrados. Los datos se toman de los sitios publicados una vez por día; verificá siempre precio y disponibilidad en la publicación original.`+(fuentes?"<br><br>Última corrida:<br>"+fuentes:"");
+  leerURL();
+  render();
+}).catch(()=>{$("lista").innerHTML='<p class="vacio">Todavía no hay datos. Corré el workflow “Actualización diaria” desde la pestaña Actions.</p>'});
+
+let t;
+CAMPOS.forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,["q","pmax","hamin"].includes(i)?150:0)}));
+$("limpiar").addEventListener("click",()=>{CAMPOS.forEach(id=>setVal(id,id==="orden"?"nuevo":""));render()});
+$("mas").addEventListener("click",()=>{mostrar+=PAGINA;render(false)});
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+name: Actualización diaria
+on:
+  schedule:
+    - cron: "0 10 * * *"   # 07:00 hora Argentina
+  workflow_dispatch: {}      # botón "Run workflow" para correrlo a mano
+permissions:
+  contents: write
+concurrency:
+  group: actualizacion
+  cancel-in-progress: false
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - run: python scraper/main.py
+        env:
+          TZ: America/Argentina/Buenos_Aires
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      - name: Guardar cambios
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add docs/data
+          git diff --staged --quiet || git commit -m "Datos del $(date +%F)"
+          git push
