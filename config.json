@@ -1,11 +1,15 @@
 {
   "departamentos": {
     "Castellanos": ["Rafaela","Sunchales","Susana","Ataliva","Angélica","Bella Italia","Josefina","Lehmann","Villa San José","Vila","Aurelia","Estación Clucellas","Clucellas","Tacural","Saguier","Egusquiza","Raquel","María Juana","Plaza Clucellas","Colonia Aldao","Virginia","Humberto Primo","Eusebia","Zenón Pereyra","Presidente Roca","San Antonio","Frontera","Pozo de los Indios","Nuevo Torino"],
-    "Las Colonias": ["Esperanza","Santa Clara de Buena Vista","Humboldt","San Carlos Centro","San Carlos Norte","San Carlos Sud","Franck","Pilar","Grutly","Felicia","Hipatia","Cavour","Providencia","Matilde","Nuevo Torino","Sarmiento","Las Tunas","Emilia","Rivadavia","Santa María Norte","San Agustín","Empalme San Carlos","Bernardo de Irigoyen","Cululú","Gessler","Progreso","Margarita","Mauá","Grütly","Colonia Belgrano"],
+    "Las Colonias": ["Esperanza","Santa Clara de Buena Vista","Humboldt","San Carlos Centro","San Carlos Norte","San Carlos Sud","Franck","Pilar","Grutly","Felicia","Hipatia","Cavour","Providencia","Matilde","Nuevo Torino","Sarmiento","Las Tunas","Emilia","Rivadavia","Santa María Norte","San Agustín","Empalme San Carlos","Bernardo de Irigoyen","Cululú","Gessler","Progreso","Margarita","Mauá","Grütly"],
     "San Cristóbal": ["San Cristóbal","Ceres","Arrufó","Hersilia","Villa Trinidad","Moisés Ville","Suardi","Soledad","Curupaytí","Colonia Dolores","Constanza","La Rubia","Ñanducita","Esmeralda","Monigotes","Tostado","Villa Saralegui","Santurce","San Guillermo","Maggiolo","Colonia Margarita","Colonia Rosa","Los Laureles"],
-    "San Jerónimo": ["Coronda","Gálvez","San Genaro","San Genaro Norte","Barrancas","Desvío Arijón","Casalegno","Larrechea","Monje","Maciel","Díaz","Loma Alta","Totoras","Carrizales","Gaboto","Irigoyen","Oliveros","Lopez","López","Arocena","Aldao","Bernardo","Centeno","Chabás","Wheelwright","Clason","Cañada Rosquín","Maria Luisa","Lucio V. López","San Eugenio","Sarmiento","Colonia Medici","Andino","Serodino"]
+    "San Martín": ["Sastre","Sastre y Ortiz","El Trébol","San Jorge","Carlos Pellegrini","Cañada Rosquín","Castelar","Colonia Belgrano","Crispi","Landeta","Las Bandurrias","Las Petacas","Los Cardos","María Susana","Piamonte","San Martín de las Escobas","Traill"]
   },
   "tipos": ["campo", "casa"],
+  "filtro_urbano": {
+    "tipos": ["casa"],
+    "localidades": ["Rafaela"]
+  },
   "dias_para_dar_de_baja": 3,
   "alertas": {
     "activo": true,
@@ -19,10 +23,10 @@
       "activo": true,
       "tipo": "campo",
       "urls": [
-        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/rafaela/",
-        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/esperanza/",
+        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/castellanos/",
+        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/las-colonias/",
         "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/san-cristobal/",
-        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/san-jeronimo/"
+        "https://inmuebles.mercadolibre.com.ar/campos/venta/santa-fe/san-martin/"
       ],
       "item": "li.ui-search-layout__item",
       "link": "a.poly-component__title",
@@ -36,19 +40,14 @@
       "nombre": "Mercado Libre",
       "activo": true,
       "tipo": "casa",
-      "urls": [
-        "https://inmuebles.mercadolibre.com.ar/casas/venta/santa-fe/rafaela/",
-        "https://inmuebles.mercadolibre.com.ar/casas/venta/santa-fe/esperanza/",
-        "https://inmuebles.mercadolibre.com.ar/casas/venta/santa-fe/san-cristobal/",
-        "https://inmuebles.mercadolibre.com.ar/casas/venta/santa-fe/san-jeronimo/"
-      ],
+      "urls": ["https://inmuebles.mercadolibre.com.ar/venta/santa-fe/rafaela/"],
       "item": "li.ui-search-layout__item",
       "link": "a.poly-component__title",
       "titulo": "a.poly-component__title",
       "precio": ".poly-price__current",
       "ubicacion": ".poly-component__location",
       "siguiente": "a.andes-pagination__link[title='Siguiente']",
-      "max_paginas": 5
+      "max_paginas": 20
     },
     {
       "nombre": "Avantix",
@@ -69,8 +68,8 @@
     {
       "nombre": "Avantix",
       "activo": true,
-      "tipo": "casa",
-      "urls": ["https://www.avantix.ar/Casas-en-Venta"],
+      "tipo": "todos",
+      "urls": ["https://www.avantix.ar/Venta"],
       "item": "li[prop-id]",
       "link": "a[href*='/p/']",
       "titulo": ".prop-desc-tipo-ub",
@@ -80,7 +79,7 @@
       "zona": "ultima",
       "quitar": ".codref, .resultadosB-interesa",
       "pagina_url": "{url}?o=2,2&p={n}",
-      "max_paginas": 10
+      "max_paginas": 40
     },
     {
       "nombre": "Propiedades Rafaela",
@@ -102,8 +101,8 @@
     {
       "nombre": "Propiedades Rafaela",
       "activo": true,
-      "tipo": "casa",
-      "urls": ["https://www.propiedadesrafaela.com/Casas-en-Venta"],
+      "tipo": "todos",
+      "urls": ["https://www.propiedadesrafaela.com/Venta"],
       "item": "li[prop-id]",
       "link": "a[href*='/p/']",
       "titulo": ".prop-desc-tipo-ub",
@@ -113,7 +112,7 @@
       "zona": "ultima",
       "quitar": ".codref, .resultadosB-interesa",
       "pagina_url": "{url}?o=2,2&p={n}",
-      "max_paginas": 10
+      "max_paginas": 40
     },
     {
       "nombre": "B+B Inmobiliaria",
@@ -133,8 +132,8 @@
     {
       "nombre": "B+B Inmobiliaria",
       "activo": true,
-      "tipo": "casa",
-      "urls": ["https://www.bmasbinmobiliaria.com.ar/propiedades/buscador/?id_operacion=1&id_tipo%5B%5D=1"],
+      "tipo": "todos",
+      "urls": ["https://www.bmasbinmobiliaria.com.ar/propiedades/buscador/?id_operacion=1"],
       "item": "div.col-lg-4:has(a[href*='/propiedades/ver/'])",
       "link": "a[href*='/propiedades/ver/']",
       "titulo": [".card-content strong", ".card-content p.red-text"],
@@ -148,7 +147,7 @@
       "nombre": "Walker Inmobiliaria",
       "activo": true,
       "tipo": "casa",
-      "urls": ["https://claudia.com.ar/listing?user_id=414&purpose=sale&type=Casa"],
+      "urls": ["https://claudia.com.ar/listing?user_id=414&purpose=sale"],
       "item": "div:has(> div.thumbnail_one)",
       "link": ".thum_title a",
       "titulo": ".thum_title a@title",
@@ -196,7 +195,7 @@
       "nombre": "Meyer Inmobiliaria",
       "activo": true,
       "tipo": "casa",
-      "urls": ["https://www.meyerinmobiliaria.com.ar/tipo-propiedad/casa/"],
+      "urls": ["https://www.meyerinmobiliaria.com.ar/estado/en-venta/"],
       "item": "div.item-listing-wrap",
       "link": "h2.item-title a",
       "titulo": "h2.item-title a",
@@ -210,6 +209,7 @@
       "nombre": "EGEAA Inmobiliaria",
       "activo": true,
       "tipo": "campo",
+      "puede_estar_vacio": true,
       "urls": ["https://egeaa.com/propiedades/?jsf=epro-loop-builder:grid1&meta=operacion:Venta"],
       "item": ".e-loop-item",
       "link": "a.elementor-button-link[href^='https://egeaa.com/']",
@@ -224,6 +224,7 @@
       "nombre": "GSM Propiedades",
       "activo": true,
       "tipo": "campo",
+      "puede_estar_vacio": true,
       "urls": ["https://gsmpropiedades.com.ar/property-status/venta/"],
       "item": ".rh-ultra-property-card-two-wrapper",
       "link": "h3.rh-ultra-property-card-two-title a",
@@ -271,8 +272,8 @@
     {
       "nombre": "Brega Inmobiliaria",
       "activo": true,
-      "tipo": "casa",
-      "urls": ["https://www.bregainmobiliaria.ar/Casas-en-Venta"],
+      "tipo": "todos",
+      "urls": ["https://www.bregainmobiliaria.ar/Venta"],
       "item": "li[prop-id]",
       "link": "a[href*='/p/']",
       "titulo": ".prop-desc-tipo-ub",
@@ -282,7 +283,7 @@
       "zona": "ultima",
       "quitar": ".codref, .resultadosB-interesa",
       "pagina_url": "{url}?o=2,2&p={n}",
-      "max_paginas": 10
+      "max_paginas": 40
     },
     {
       "nombre": "Gaggiotti Inmobiliaria",
@@ -290,7 +291,7 @@
       "tipo": "todos",
       "api": "gaggiotti",
       "urls": ["https://www.gaggiotti.com.ar/api/Property/Search"],
-      "tipos_api": {"campo": [100, 101], "casa": [3, 4]}
+      "ids_campo": [100, 101]
     },
     {
       "nombre": "Argenprop",

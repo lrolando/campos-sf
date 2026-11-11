@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Campos y casas · Centro-oeste de Santa Fe</title>
-<meta name="description" content="Campos y casas en venta en Castellanos, Las Colonias, San Cristóbal y San Jerónimo, actualizado todos los días.">
+<meta name="description" content="Campos en venta en Castellanos, Las Colonias, San Cristóbal y San Martín, y todas las propiedades en venta de Rafaela. Actualizado todos los días.">
 <style>
 :root{--bg:#eef1ea;--surface:#fbfcf9;--ink:#1c2a21;--muted:#5c6b60;--line:#cfd7c8;--green:#2f6b3f;--gold:#8a6612;--blue:#27567a;--red:#a23b2a}
 @media (prefers-color-scheme:dark){:root{--bg:#141b16;--surface:#1c261f;--ink:#e6ece5;--muted:#9aa89d;--line:#2f3d33;--green:#7fc08f;--gold:#e0b64d;--blue:#7fb0d6;--red:#e88a78}}
@@ -41,6 +41,7 @@ h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:0 0 6px;letter-spac
 .ver{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--green)}
 .vacio{padding:40px 0;color:var(--muted)}
 #mas{display:block;margin:20px auto;padding:10px 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:.9rem system-ui,sans-serif;cursor:pointer}
+#mas[hidden]{display:none}
 footer{padding:28px 18px 40px;color:var(--muted);font:.8rem/1.6 system-ui,sans-serif}
 .err{color:var(--red)}
 a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
@@ -50,10 +51,10 @@ a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{ou
 <body>
 <header>
   <h1>Campos y casas en venta</h1>
-  <p class="sub">Castellanos, Las Colonias, San Cristóbal y San Jerónimo. <span id="act"></span></p>
+  <p class="sub">Campos en Castellanos, Las Colonias, San Cristóbal y San Martín. En Rafaela, todas las propiedades en venta (casas, departamentos, lotes, locales, cocheras…). <span id="act"></span></p>
   <div class="filtros">
     <input id="q" type="search" placeholder="Buscar por localidad o palabra" aria-label="Buscar">
-    <select id="tipo" aria-label="Tipo"><option value="">Campos y casas</option><option value="campo">Campos</option><option value="casa">Casas</option></select>
+    <select id="tipo" aria-label="Tipo"><option value="">Campos y casas</option><option value="campo">Campos</option><option value="casa">Casas (Rafaela)</option></select>
     <select id="depto" aria-label="Departamento"><option value="">Todos los departamentos</option></select>
     <select id="fuente" aria-label="Fuente"><option value="">Todas las fuentes</option></select>
     <select id="orden" aria-label="Orden">

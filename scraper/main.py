@@ -32,8 +32,8 @@ LOCALIDADES = {}
 for depto, locs in CFG["departamentos"].items():
     for l in locs:
         LOCALIDADES.setdefault(norm(l), depto)
-    LOCALIDADES.setdefault(norm(depto), depto)
 LOCALIDADES_ORDEN = sorted(LOCALIDADES, key=len, reverse=True)  # nombres largos primero
+DEPARTAMENTOS = {norm(d): d for d in CFG["departamentos"]}
 
 
 def departamento_de(texto):
@@ -41,6 +41,12 @@ def departamento_de(texto):
     for loc in LOCALIDADES_ORDEN:
         if f" {loc} " in t:
             return LOCALIDADES[loc], loc
+    # El nombre del departamento solo vale como tramo completo ("El Trébol, San Martín",
+    # "Departamento Las Colonias"), no dentro de una calle ("San Martín 441").
+    for tramo in re.split(r"[,|]", texto or ""):
+        d = re.sub(r"^(departamento|dpto|depto)\.?\s+", "", norm(tramo).strip())
+        if d in DEPARTAMENTOS:
+            return DEPARTAMENTOS[d], d
     return None, None
 
 
@@ -88,21 +94,66 @@ def id_de(url):
     return hashlib.sha1(clave.encode()).hexdigest()[:12]
 
 
+# Hay dos tipos: "campo" y "casa". "casa" agrupa todo lo urbano (casas, departamentos, PH, lotes,
+# quintas, locales, cocheras, galpones...). Gana la palabra clave que aparece primero en el texto
+# ("Campo con casa" es campo, "Casa quinta con 2 ha" es casa).
+TIPOS_CLAVE = [
+    (r"\b(casas?|duplex|chalet|viviendas?|quintas?|ph|departamentos?|deptos?|dptos?|monoambientes?|"
+     r"lotes?|loteo|terrenos?|local(es)?|oficinas?|cocheras?|galpon(es)?|depositos?|naves?|edificios?)\b", "casa"),
+    (r"\b(campos?|chacras?|establecimiento|hectareas?)\b|\b\d+\s*has?\b", "campo"),
+]
+
+
+# Subdominios de los avisos de Mercado Libre que indican el tipo (casa.mercadolibre.com.ar/MLA-...)
+ML_SUBDOMINIOS = {"campo", "casa", "departamento", "ph", "terreno", "lote", "quinta", "local", "oficina",
+                  "cochera", "galpon", "deposito"}
+
+
+def detectar_tipo(texto):
+    """(tipo, posición) de la primera palabra clave del texto, o (None, None)."""
+    t = norm(texto)
+    hallados = [(m.start(), tipo) for pat, tipo in TIPOS_CLAVE if (m := re.search(pat, t))]
+    if not hallados:
+        return None, None
+    pos, tipo = min(hallados, key=lambda x: x[0])
+    return tipo, pos
+
+
+def tipo_de_texto(texto):
+    """"campo" si el texto habla de un campo; si no, "casa" (cualquier propiedad urbana)."""
+    tipo, _ = detectar_tipo(texto)
+    return tipo or "casa"
+
+
 def tipo_real(tipo, url, titulo):
-    """Corrige el tipo: las búsquedas de 'campos' a veces traen casas o departamentos.
-    Devuelve None si el aviso no es ni campo ni casa (departamentos, locales, etc.)."""
+    """Devuelve "campo" o "casa". El tipo de la búsqueda se corrige con el del aviso: una búsqueda de
+    campos puede traer un departamento, y en una búsqueda general ("todos") el tipo sale del título."""
     sub = re.match(r"https?://([a-z]+)\.mercadolibre", url or "")
-    sub = sub.group(1) if sub else ""
-    if sub == "departamento":
-        return None
-    if sub == "casa":
-        return "casa"
-    t = norm(titulo)
-    if tipo == "campo" and re.match(r"(venta (de )?)?(casa|duplex|chalet)\b", t) and not re.search(r"\bcampo\b|\bha\b|hectarea", t):
-        return "casa"
-    if re.match(r"(venta (de )?)?(departamento|depto|monoambiente|local|oficina|cochera)\b", t):
-        return None
-    return tipo
+    if sub and sub.group(1) in ML_SUBDOMINIOS:  # campo.mercadolibre.com.ar/MLA-...
+        return "campo" if sub.group(1) == "campo" else "casa"
+    det, pos = detectar_tipo(titulo)
+    if tipo == "campo":
+        # "Casa de campo 50 ha" en una búsqueda de campos sigue siendo campo
+        if det == "casa" and pos <= 15 and not re.search(r"\bcampos?\b|\bhas?\b|hectarea", norm(titulo)):
+            return "casa"
+        return "campo"
+    if det == "campo" and (pos <= 15 or tipo == "todos"):
+        return "campo"
+    return "casa"
+
+
+def permitido(tipo, ubicacion, titulo=""):
+    """Lo urbano ("casa") solo se guarda en las localidades de `filtro_urbano` (Rafaela);
+    los campos, en todas las de `departamentos`."""
+    f = CFG.get("filtro_urbano")
+    if not f or tipo not in f["tipos"]:
+        return True
+    zona = zona_de(ubicacion)
+    t = " " + re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", norm(zona if zona.strip() else titulo))) + " "
+    return any(f" {norm(l)} " in t for l in f["localidades"])
+
+
+CON_HECTAREAS = ("campo",)
 
 
 def sel_text(el, css):
@@ -190,24 +241,26 @@ def completar_con_detalle(site, raw):
 def scrape_api_gaggiotti(site):
     """Gaggiotti arma su sitio con JavaScript: se lee la misma API de búsqueda que usa su web
     (solo lectura, autorizado por el dueño del proyecto). Devuelve (avisos crudos, errores)."""
-    tipos = {i: tipo for tipo, ids in site["tipos_api"].items() for i in ids}
-    props, errores = [], []
-    # Una consulta por tipo: mezclar los tipos "Campo" (100/101) con los demás devuelve 0 resultados.
-    for ids in site["tipos_api"].values():
+    ids_campo = set(site["ids_campo"])
+    props, errores = {}, []
+    # Dos consultas: los tipos "Campo" (ids_campo) y todo lo demás en venta (lista vacía = todos los tipos).
+    # Mezclar los ids de campo con otros tipos en una sola consulta devuelve 0 resultados.
+    for ids in (sorted(ids_campo), []):
         try:
             r = SESSION.post(site["urls"][0], timeout=40, json={
-                "operationTypes": [1], "propertyTypes": ids, "limit": 500, "offset": 0})
+                "operationTypes": [1], "propertyTypes": ids, "limit": 1000, "offset": 0})
             r.raise_for_status()
-            props += r.json()["response"]["properties"]
+            for p in r.json()["response"]["properties"]:
+                props[p["id"]] = p
         except Exception as e:
-            errores.append(f"{site['urls'][0]} {ids}: {e}")
+            errores.append(f"{site['urls'][0]} {ids or 'todos'}: {e}")
         time.sleep(2)
     resultados = []
-    for p in props:
-        tipo = tipos.get((p.get("type") or {}).get("id"))
+    for p in props.values():
+        tipo = "campo" if (p.get("type") or {}).get("id") in ids_campo else "casa"
         venta = next((o for o in p.get("operations", []) if o.get("operationType") == "Compra-Venta"), None)
         partes = [x.strip() for x in (p.get("location") or {}).get("fullLocation", "").split("|")]
-        if not tipo or not venta or len(partes) < 4 or norm(partes[1]) != "santa fe":
+        if not venta or len(partes) < 4 or norm(partes[1]) != "santa fe":
             continue
         precios = venta.get("prices") or []
         precio_txt = f"{precios[0]['currency']} {precios[0]['price']}" if precios and p.get("webPrice") else ""
@@ -243,6 +296,8 @@ def scrape_sitio(site):
                 raw = leer_tarjeta(site, it, url)
                 if not raw or any(r["url"] == raw["url"] for r in resultados):
                     continue
+                if raw.get("tipo") and not permitido(raw["tipo"], raw["ubicacion"], raw["titulo"]):
+                    continue  # p. ej. una casa fuera de Rafaela: no hace falta entrar a su página
                 if site.get("detalle"):
                     try:
                         time.sleep(1.5)
@@ -280,7 +335,7 @@ def zona_de(ubicacion, modo=None):
 
 def construir(site, raw):
     tipo = tipo_real(raw.get("tipo") or site["tipo"], raw["url"], raw["titulo"])
-    if not tipo:
+    if not tipo or not permitido(tipo, raw["ubicacion"], raw["titulo"]):
         return None
     zona = zona_de(raw["ubicacion"], site.get("zona"))
     depto, loc = departamento_de(zona if zona.strip() else raw["titulo"])
@@ -292,36 +347,26 @@ def construir(site, raw):
         "url": raw["url"], "fuente": site["nombre"], "tipo": tipo,
         "titulo": raw["titulo"], "ubicacion": raw["ubicacion"] or loc.title(),
         "departamento": depto, "precio": precio, "moneda": moneda,
-        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["texto"]) if tipo == "campo" else None,
+        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
     }
-
-
-def tipo_de_texto(texto):
-    """Tipo según la primera palabra clave que aparece ("Casa quinta" es casa, "Campo con casa" es campo)."""
-    t = norm(texto)
-    claves = [(r"\b(departamento|depto|monoambiente|local|oficina|cochera|lote|terreno)\b", None),
-              (r"\b(casa|duplex|chalet)\b", "casa"),
-              (r"\b(campo|chacra|establecimiento|hectareas?)\b|\b\d+\s*has?\b", "campo")]
-    hallados = [(m.start(), tipo) for pat, tipo in claves if (m := re.search(pat, t))]
-    return min(hallados, key=lambda x: x[0])[1] if hallados else None
 
 
 def construir_alerta(raw):
     # El slug de la URL ("casa en venta en san carlos centro") es la fuente más confiable de tipo y localidad.
     tipo = tipo_de_texto(raw["slug"]) or tipo_de_texto(raw["titulo"])
-    if not tipo:
+    if tipo not in CFG["tipos"]:
         return None
     depto, loc = departamento_de(raw["slug"])
     if not depto:
         depto, loc = departamento_de(raw["titulo"] + " " + raw["texto"])
-    if not depto:
+    if not depto or not permitido(tipo, loc):
         return None
     precio, moneda = parse_precio(raw["precio_txt"])
     return {
         "id": id_de(raw["url"]), "url": raw["url"], "fuente": raw["fuente"], "tipo": tipo, "via": "alerta",
         "titulo": raw["titulo"], "ubicacion": loc.title(), "departamento": depto,
         "precio": precio, "moneda": moneda,
-        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["slug"] + " " + raw["texto"]) if tipo == "campo" else None,
+        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["slug"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
     }
 
 
@@ -382,7 +427,17 @@ def sanear_previos(avisos_previos):
         if not tipo:
             continue
         a["tipo"] = tipo
-        if tipo != "campo":
+        if a.get("departamento") not in CFG["departamentos"]:
+            # Departamento que ya no está en config.json (p. ej. se reemplazó San Jerónimo por San Martín):
+            # se vuelve a calcular con las localidades actuales; si no corresponde a ninguno, se descarta.
+            zona = zona_de(a.get("ubicacion"))
+            depto, _ = departamento_de(zona if zona.strip() else a.get("titulo", ""))
+            if not depto:
+                continue
+            a["departamento"] = depto
+        if not permitido(tipo, a.get("ubicacion"), a.get("titulo", "")):
+            continue  # p. ej. una casa fuera de Rafaela
+        if tipo not in CON_HECTAREAS:
             a["hectareas"] = None
         if a.get("precio") is not None and a["precio"] < PRECIO_MINIMO:
             a["precio"] = None
