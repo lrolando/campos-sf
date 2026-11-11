@@ -6,101 +6,220 @@
 <title>Campos y casas · Centro-oeste de Santa Fe</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="description" content="Campos en venta en Castellanos, Las Colonias, San Cristóbal y San Martín, y todas las propiedades en venta de Rafaela. Actualizado todos los días.">
+<meta name="theme-color" content="#eef1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141b16" media="(prefers-color-scheme: dark)">
 <style>
-:root{--bg:#eef1ea;--surface:#fbfcf9;--ink:#1c2a21;--muted:#5c6b60;--line:#cfd7c8;--green:#2f6b3f;--gold:#8a6612;--blue:#27567a;--red:#a23b2a}
-@media (prefers-color-scheme:dark){:root{--bg:#141b16;--surface:#1c261f;--ink:#e6ece5;--muted:#9aa89d;--line:#2f3d33;--green:#7fc08f;--gold:#e0b64d;--blue:#7fb0d6;--red:#e88a78}}
+:root{
+  --bg:#eef1ea;--surface:#fbfcf9;--surface-2:#e4e9de;--ink:#1c2a21;--muted:#5c6b60;--line:#cfd7c8;
+  --green:#2f6b3f;--green-soft:#dcebdf;--on-green:#fbfcf9;--gold:#8a6612;--blue:#27567a;--red:#a23b2a;
+  --shadow:0 1px 2px rgba(28,42,33,.06),0 2px 8px rgba(28,42,33,.05);--radius:10px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141b16;--surface:#1c261f;--surface-2:#24302a;--ink:#e6ece5;--muted:#9aa89d;--line:#2f3d33;
+  --green:#7fc08f;--green-soft:#22352a;--on-green:#10170f;--gold:#e0b64d;--blue:#7fb0d6;--red:#e88a78;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Iowan Old Style","Palatino Linotype",Georgia,serif}
-header,main,footer{max-width:980px;margin:0 auto;padding:0 18px}
-header{padding-top:36px}
-h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:0 0 22px}
-.sans{font-family:system-ui,sans-serif}
-.filtros{display:flex;flex-wrap:wrap;gap:10px;padding:14px 0;border-top:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.9rem}
-.filtros+.filtros{border-top:0;padding-top:0}
-.filtros:last-of-type{border-bottom:1px solid var(--line)}
-.filtros input,.filtros select,.filtros button{padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;min-width:0}
-.filtros input[type=search]{flex:1 1 220px}
-.filtros input[type=number]{width:9.5em}
-.filtros button{cursor:pointer;color:var(--muted)}
-.filtros button:hover{color:var(--ink)}
-.filtros label{display:flex;align-items:center;gap:6px}
-.resumen{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:system-ui,sans-serif;color:var(--muted);font-size:.85rem;margin:14px 0}
-.resumen b{color:var(--ink);font-weight:600}
-.aviso{display:grid;grid-template-columns:1fr auto;gap:4px 18px;padding:16px 0;border-bottom:1px solid var(--line)}
-.aviso.inactivo{opacity:.65}
-.aviso h2{font-size:1.1rem;margin:0}
-.aviso h2 a{color:var(--ink);text-decoration:none}
-.aviso h2 a:hover{text-decoration:underline}
-.meta{color:var(--muted);font-family:system-ui,sans-serif;font-size:.85rem}
-.hist{color:var(--muted);font-family:system-ui,sans-serif;font-size:.8rem}
-.precio{font-size:1.25rem;font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.precio small{display:block;font-size:.8rem;font-weight:400;font-family:system-ui,sans-serif;color:var(--muted)}
-.precio .na{color:var(--muted);font-weight:400;font-size:1rem}
-.tag{display:inline-block;padding:1px 8px;border-radius:99px;font:600 .75rem system-ui,sans-serif;margin-right:6px;border:1px solid currentColor;vertical-align:2px}
+[hidden]{display:none!important}
+html{scroll-padding-top:150px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--green)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+/* Encabezado */
+.cab{padding:32px 0 18px}
+.cab h1{font:700 clamp(1.7rem,4.6vw,2.6rem)/1.1 var(--serif);letter-spacing:-.01em;margin:0 0 8px}
+.cab p{margin:0;color:var(--muted);max-width:62ch}
+.act{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:.82rem;color:var(--muted)}
+.act::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+
+/* Barra de filtros fija */
+.barra{position:sticky;top:0;z-index:10;background:var(--bg);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0}
+.buscar{position:relative;flex:1 1 240px;min-width:0}
+.buscar svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.buscar input[type=search]{width:100%;padding:9px 34px 9px 34px}
+.buscar kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font:600 .72rem var(--sans);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+input,select,button{font:inherit;color:var(--ink)}
+input[type=search],input[type=number],select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+select{cursor:pointer}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:600;font-size:.88rem;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;font-weight:600;font-size:.88rem}
+.btn:hover{border-color:var(--muted)}
+.btn .n{background:var(--green);color:var(--on-green);border-radius:99px;font-size:.72rem;padding:0 7px;line-height:1.6}
+.link{border:0;background:none;color:var(--green);cursor:pointer;font-weight:600;padding:4px 2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:thin}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:5px 12px;cursor:pointer;font-size:.85rem;white-space:nowrap}
+.chip small{color:var(--muted);margin-left:4px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed=true]{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.chip[aria-pressed=true] small{color:inherit;opacity:.85}
+.chip:disabled{opacity:.45;cursor:default}
+.panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 14px;padding:4px 0 14px}
+.campo label,.campo .lab{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.campo select,.campo input{width:100%}
+.checks{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.checks label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:.9rem}
+.checks input{width:16px;height:16px;accent-color:var(--green)}
+
+/* Resumen */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0 6px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
+.stat span{display:block;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.stat b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.activos{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.activos button{border:1px solid var(--line);background:var(--surface-2);border-radius:99px;padding:3px 10px;font-size:.8rem;cursor:pointer}
+.activos button::after{content:" ✕";color:var(--muted)}
+
+/* Tarjetas */
+.lista{display:grid;gap:12px;margin:14px 0}
+.card{display:grid;grid-template-columns:1fr auto;gap:6px 20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.card:hover{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+.card.inactivo{opacity:.62}
+.etq{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;font:600 .72rem/1.7 var(--sans);border:1px solid currentColor}
+.tag.tipo{border-color:var(--line);color:var(--muted);background:var(--surface-2)}
 .nuevo{color:var(--green)}.baja{color:var(--blue)}.sube{color:var(--red)}.off{color:var(--gold)}
-.ver{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--green)}
-.vacio{padding:40px 0;color:var(--muted)}
-#mas{display:block;margin:20px auto;padding:10px 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:.9rem system-ui,sans-serif;cursor:pointer}
-#mas[hidden]{display:none}
-footer{padding:28px 18px 40px;color:var(--muted);font:.8rem/1.6 system-ui,sans-serif}
-.err{color:var(--red)}
-a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
-@media(max-width:560px){.aviso{grid-template-columns:1fr}.precio{text-align:left}.filtros select,.filtros input[type=number]{flex:1 1 45%}}
+.card h2{font:600 1.08rem/1.35 var(--serif);margin:0}
+.card h2 a{color:var(--ink);text-decoration:none}
+.card h2 a:hover{text-decoration:underline}
+.loc{color:var(--muted);font-size:.88rem;margin-top:3px}
+.datos{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.84rem;color:var(--muted);margin-top:8px}
+.datos b{color:var(--ink);font-weight:600}
+.pie-card{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:10px;font-size:.84rem}
+.fuente{color:var(--muted)}
+.ver{font-weight:600;text-decoration:none}
+.ver:hover{text-decoration:underline}
+.precio{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.precio .monto{font-size:1.3rem;font-weight:700;letter-spacing:-.01em}
+.precio .na{color:var(--muted);font-weight:500;font-size:1rem}
+.precio small{display:block;font-size:.8rem;color:var(--muted)}
+details.hist{grid-column:1/-1;font-size:.82rem;color:var(--muted)}
+details.hist summary{cursor:pointer;width:fit-content}
+details.hist ol{margin:6px 0 0;padding-left:18px}
+.vacio{text-align:center;padding:48px 16px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius)}
+.vacio p{margin:0 0 12px}
+.esq{height:112px;border-radius:var(--radius);background:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:brillo 1.2s infinite linear;border:1px solid var(--line)}
+@keyframes brillo{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.esq{animation:none}}
+#mas{display:block;margin:6px auto 24px}
+#arriba{position:fixed;right:16px;bottom:16px;z-index:11;border-radius:99px;box-shadow:var(--shadow)}
+
+/* Pie */
+footer{padding:20px 0 48px;color:var(--muted);font-size:.84rem}
+footer details{margin-top:12px}
+footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.tabla{width:100%;border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums}
+.tabla th,.tabla td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.tabla th{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.tabla td.n,.tabla th.n{text-align:right}
+.err{color:var(--red);font-weight:600}
+
+@media (max-width:600px){
+  .card{grid-template-columns:1fr;padding:14px}
+  .precio{text-align:left;order:-1}
+  .seg{flex:1 1 100%}.seg button{flex:1}
+  .fila>select,.fila>.btn{flex:1 1 40%}
+  .buscar kbd{display:none}
+}
 </style>
 </head>
 <body>
-<header>
+<header class="wrap cab">
   <h1>Campos y casas en venta</h1>
-  <p class="sub">Campos en Castellanos, Las Colonias, San Cristóbal y San Martín. En Rafaela, todas las propiedades en venta (casas, departamentos, lotes, locales, cocheras…). <span id="act"></span></p>
-  <div class="filtros">
-    <input id="q" type="search" placeholder="Buscar por localidad o palabra" aria-label="Buscar">
-    <select id="tipo" aria-label="Tipo"><option value="">Campos y casas</option><option value="campo">Campos</option><option value="casa">Casas (Rafaela)</option></select>
-    <select id="depto" aria-label="Departamento"><option value="">Todos los departamentos</option></select>
-    <select id="fuente" aria-label="Fuente"><option value="">Todas las fuentes</option></select>
-    <select id="orden" aria-label="Orden">
-      <option value="nuevo">Más recientes</option>
-      <option value="precio">Menor precio</option>
-      <option value="precio_desc">Mayor precio</option>
-      <option value="ha">Más hectáreas</option>
-      <option value="usdha">Menor USD por ha</option>
-    </select>
-  </div>
-  <div class="filtros">
-    <input id="pmax" type="number" min="0" step="1000" inputmode="numeric" placeholder="Precio máx. USD" aria-label="Precio máximo en dólares">
-    <input id="hamin" type="number" min="0" step="1" inputmode="numeric" placeholder="Mín. hectáreas" aria-label="Hectáreas mínimas">
-    <label><input id="soloNuevos" type="checkbox"> Nuevos (7 días)</label>
-    <label><input id="conBajas" type="checkbox"> Bajaron de precio</label>
-    <label><input id="conPrecio" type="checkbox"> Con precio</label>
-    <label><input id="verBajas" type="checkbox"> Incluir dados de baja</label>
-    <button id="limpiar" type="button">Limpiar filtros</button>
-  </div>
+  <p>Campos en Castellanos, Las Colonias, San Cristóbal y San Martín. En Rafaela, todas las propiedades en venta: casas, departamentos, terrenos, locales, galpones y más.</p>
+  <div class="act" id="act">Cargando datos…</div>
 </header>
-<main>
-  <div class="resumen" id="resumen" aria-live="polite"></div>
-  <div id="lista"></div>
-  <button id="mas" type="button" hidden>Mostrar más</button>
+
+<div class="barra">
+  <div class="wrap">
+    <div class="fila">
+      <div class="buscar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="sr" for="q">Buscar</label>
+        <input id="q" type="search" placeholder="Buscar por localidad, barrio o palabra" autocomplete="off">
+        <kbd aria-hidden="true">/</kbd>
+      </div>
+      <div class="seg" role="group" aria-label="Qué mostrar">
+        <button type="button" data-tipo="" aria-pressed="true">Todo</button>
+        <button type="button" data-tipo="campo" aria-pressed="false">Campos</button>
+        <button type="button" data-tipo="casa" aria-pressed="false">Casas</button>
+      </div>
+      <label class="sr" for="orden">Ordenar</label>
+      <select id="orden">
+        <option value="nuevo">Más recientes</option>
+        <option value="precio">Menor precio</option>
+        <option value="precio_desc">Mayor precio</option>
+        <option value="ha" data-campo>Más hectáreas</option>
+        <option value="usdha" data-campo>Menor USD por ha</option>
+      </select>
+      <button type="button" class="btn" id="verFiltros" aria-expanded="false" aria-controls="panel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        Filtros <span class="n" id="nFiltros" hidden></span>
+      </button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Tipo de casa" hidden></div>
+    <div class="panel" id="panel" hidden>
+      <div class="campo"><label for="depto">Departamento</label><select id="depto"><option value="">Todos</option></select></div>
+      <div class="campo"><label for="fuente">Fuente</label><select id="fuente"><option value="">Todas</option></select></div>
+      <div class="campo"><label for="pmax">Precio máximo (USD)</label><input id="pmax" type="number" min="0" step="1000" inputmode="numeric" placeholder="Sin límite"></div>
+      <div class="campo" id="campoHa"><label for="hamin">Hectáreas mínimas</label><input id="hamin" type="number" min="0" step="1" inputmode="numeric" placeholder="Cualquiera"></div>
+      <div class="checks">
+        <label><input id="soloNuevos" type="checkbox"> Nuevos (últimos 7 días)</label>
+        <label><input id="conBajas" type="checkbox"> Bajaron de precio</label>
+        <label><input id="conPrecio" type="checkbox"> Con precio publicado</label>
+        <label><input id="verBajas" type="checkbox"> Incluir dados de baja</label>
+        <button type="button" class="link" id="limpiar">Limpiar filtros</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="stats" id="stats" aria-live="polite"></div>
+  <div class="activos" id="activos"></div>
+  <div class="lista" id="lista">
+    <div class="esq"></div><div class="esq"></div><div class="esq"></div>
+  </div>
+  <button type="button" class="btn" id="mas" hidden>Mostrar más</button>
 </main>
-<footer id="pie"></footer>
+<button type="button" class="btn" id="arriba" hidden aria-label="Volver arriba">↑ Arriba</button>
+<footer class="wrap" id="pie"></footer>
+
 <script>
 const $=id=>document.getElementById(id);
-const CAMPOS=["q","tipo","depto","fuente","orden","pmax","hamin","soloNuevos","conBajas","conPrecio","verBajas"];
-const PAGINA=50;
+const SUBTIPOS={casa:"Casa",departamento:"Departamento",local:"Local",galpon:"Galpón",terreno:"Terreno",cochera:"Cochera",oficina:"Oficina",consultorio:"Consultorio",otro:"Otro"};
+const CAMPOS=["q","tipo","subtipo","depto","fuente","orden","pmax","hamin","soloNuevos","conBajas","conPrecio","verBajas"];
+const PANEL=["depto","fuente","pmax","hamin","soloNuevos","conBajas","conPrecio","verBajas"];
+const ETIQ={depto:"Departamento",fuente:"Fuente",pmax:"Hasta USD",hamin:"Desde ha",soloNuevos:"Nuevos",conBajas:"Bajaron de precio",conPrecio:"Con precio",verBajas:"Incluye dados de baja"};
+const PAGINA=40;
+const S={tipo:"",subtipo:""};  // estado de los botones (los demás filtros están en sus controles)
 let DATA=[],mostrar=PAGINA;
+
 const num=n=>n.toLocaleString("es-AR",{maximumFractionDigits:1});
 const fmt=(n,m)=>n==null?null:(m==="USD"?"USD ":"$ ")+num(n);
 const dias=f=>Math.floor((Date.now()-new Date(f+"T00:00:00"))/864e5);
 const fecha=f=>f.split("-").reverse().join("/");
+const hace=f=>{const d=dias(f);return d<=0?"hoy":d===1?"ayer":d<30?`hace ${d} días`:"el "+fecha(f)};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-const usdHa=a=>a.precio&&a.hectareas&&a.moneda==="USD"?a.precio/a.hectareas:null;
+// Menos de USD 100 por ha no es un precio real (precio de relleno o cargado por ha): no se muestra ni se promedia.
+const usdHa=a=>{const v=a.precio&&a.hectareas&&a.moneda==="USD"?a.precio/a.hectareas:null;return v>=100?v:null};
 const bajo=a=>a.precio_anterior&&a.precio&&a.precio<a.precio_anterior;
+// Precio típico = mediana: la mitad cuesta menos y la mitad más. No lo distorsionan los avisos extremos.
 const mediana=v=>{if(!v.length)return null;v=[...v].sort((a,b)=>a-b);const m=v.length>>1;return v.length%2?v[m]:(v[m-1]+v[m])/2};
+const usd=n=>"USD "+Math.round(n).toLocaleString("es-AR");
 // Precios sin dólares quedan al final: no hay tipo de cambio para compararlos con los de USD.
 const clavePrecio=a=>a.precio==null?Infinity:a.moneda==="USD"?a.precio:1e15+a.precio;
+const subtipo=a=>a.subtipo||"otro";
 
-function val(id){const e=$(id);return e.type==="checkbox"?e.checked:e.value}
-function setVal(id,v){const e=$(id);e.type==="checkbox"?e.checked=v==="1":e.value=v}
+function val(id){if(id in S)return S[id];const e=$(id);return e.type==="checkbox"?e.checked:e.value}
+function setVal(id,v){if(id in S){S[id]=v||"";return}const e=$(id);e.type==="checkbox"?e.checked=v==="1"||v===true:e.value=v??""}
 
 function guardarURL(){
   const p=new URLSearchParams();
@@ -113,10 +232,11 @@ function leerURL(){
   CAMPOS.forEach(id=>{if(p.has(id))setVal(id,p.get(id))});
 }
 
-function filtrar(){
+function filtrar(conSubtipo=true){
   const q=norm(val("q")).split(/\s+/).filter(Boolean),t=val("tipo"),d=val("depto"),f=val("fuente");
-  const pmax=+val("pmax")||0,hamin=+val("hamin")||0;
-  return DATA.filter(a=>(!t||a.tipo===t)&&(!d||a.departamento===d)&&(!f||a.fuente===f)
+  const st=conSubtipo&&t==="casa"?val("subtipo"):"";  // el subtipo solo aplica a Rafaela
+  const pmax=+val("pmax")||0,hamin=t==="casa"?0:+val("hamin")||0;
+  return DATA.filter(a=>(!t||a.tipo===t)&&(!st||subtipo(a)===st)&&(!d||a.departamento===d)&&(!f||a.fuente===f)
     &&(val("verBajas")||a.activo)
     &&(!q.length||q.every(w=>a._txt.includes(w)))
     &&(!val("soloNuevos")||dias(a.primera_vez)<=7)
@@ -134,55 +254,121 @@ function ordenar(r){
 }
 
 function tarjeta(a){
-  const tags=[];
+  const tags=[`<span class="tag tipo">${a.tipo==="campo"?"Campo":esc(SUBTIPOS[subtipo(a)])}</span>`];
   if(dias(a.primera_vez)<=7)tags.push('<span class="tag nuevo">Nuevo</span>');
   if(bajo(a))tags.push(`<span class="tag baja">Bajó ${Math.round((1-a.precio/a.precio_anterior)*100)}%</span>`);
   else if(a.precio_anterior&&a.precio>a.precio_anterior)tags.push('<span class="tag sube">Subió</span>');
   if(!a.activo)tags.push(`<span class="tag off">Dado de baja · visto por última vez el ${fecha(a.ultima_vez)}</span>`);
+  const loc=[a.ubicacion,a.departamento].filter((x,i,arr)=>x&&!(i===1&&norm(arr[0]).includes(norm(x))));
+  const datos=[];
+  if(a.hectareas)datos.push(`<span><b>${num(a.hectareas)}</b> ha</span>`);
+  const uh=usdHa(a);
+  if(uh)datos.push(`<span><b>${usd(uh)}</b> por ha</span>`);
+  datos.push(`<span title="Primera vez que apareció en la búsqueda diaria">Detectado ${hace(a.primera_vez)}</span>`);
   const h=(a.historial||[]).filter(x=>x.precio!=null);
-  const hist=h.length>1?`<div class="hist">Historial: ${h.map(x=>esc(fmt(x.precio,x.moneda))+" ("+fecha(x.fecha)+")").join(" → ")}</div>`:"";
-  const p=fmt(a.precio,a.moneda),uh=usdHa(a);
-  const meta=[esc(a.ubicacion),esc(a.departamento),a.hectareas?num(a.hectareas)+" ha":"",
-    a.tipo==="campo"?"Campo":"Casa","visto desde el "+fecha(a.primera_vez)].filter(Boolean).join(" · ");
-  return `<article class="aviso${a.activo?"":" inactivo"}"><div><h2>${tags.join("")}<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.titulo)}</a></h2>
-    <div class="meta">${meta}</div>${hist}
-    <a class="ver" href="${esc(a.url)}" target="_blank" rel="noopener">Ver publicación en ${esc(a.fuente)} ↗</a></div>
-    <div class="precio">${p?esc(p):'<span class="na">Consultar</span>'}${bajo(a)?`<small><s>${esc(fmt(a.precio_anterior,a.moneda))}</s></small>`:""}${uh?"<small>USD "+Math.round(uh).toLocaleString("es-AR")+" por ha</small>":""}</div></article>`;
+  const hist=h.length>1?`<details class="hist"><summary>Historial de precios (${h.length})</summary><ol>${h.map(x=>`<li>${esc(fmt(x.precio,x.moneda))} · ${fecha(x.fecha)}</li>`).join("")}</ol></details>`:"";
+  const p=fmt(a.precio,a.moneda);
+  return `<article class="card${a.activo?"":" inactivo"}">
+    <div>
+      <div class="etq">${tags.join("")}</div>
+      <h2><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.titulo)}</a></h2>
+      <div class="loc">${loc.map(esc).join(" · ")}</div>
+      <div class="datos">${datos.join("")}</div>
+      <div class="pie-card"><span class="fuente">${esc(a.fuente)}</span><a class="ver" href="${esc(a.url)}" target="_blank" rel="noopener">Ver publicación ↗</a></div>
+    </div>
+    <div class="precio">${p?`<div class="monto">${esc(p)}</div>`:'<div class="na">Consultar precio</div>'}${bajo(a)?`<small><s>${esc(fmt(a.precio_anterior,a.moneda))}</s></small>`:""}</div>
+    ${hist}
+  </article>`;
+}
+
+function chips(){
+  const base=filtrar(false),n={};
+  base.forEach(a=>{const s=subtipo(a);n[s]=(n[s]||0)+1});
+  const st=val("subtipo");
+  $("chips").innerHTML=`<button type="button" class="chip" data-st="" aria-pressed="${!st}">Todas<small>${base.length}</small></button>`+
+    Object.entries(SUBTIPOS).map(([k,v])=>`<button type="button" class="chip" data-st="${k}" aria-pressed="${st===k}" ${n[k]||st===k?"":"disabled"}>${v}<small>${n[k]||0}</small></button>`).join("");
 }
 
 function render(reiniciar=true){
+  const t=val("tipo"),esCasa=t==="casa";
+  if(!esCasa)S.subtipo="";
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tipo===t));
+  $("chips").hidden=!esCasa;
+  $("campoHa").hidden=esCasa;
+  // Ordenar por hectáreas no tiene sentido en Rafaela
+  document.querySelectorAll("#orden option[data-campo]").forEach(o=>o.hidden=esCasa);
+  if(esCasa&&["ha","usdha"].includes(val("orden")))setVal("orden","nuevo");
+  if(esCasa)chips();
   if(reiniciar)mostrar=PAGINA;
   guardarURL();
+
+  const activos=PANEL.filter(id=>{const v=val(id);return v&&!(id==="hamin"&&esCasa)});
+  $("nFiltros").hidden=!activos.length;$("nFiltros").textContent=activos.length;
+  $("activos").innerHTML=activos.map(id=>{const v=val(id);return `<button type="button" data-quitar="${id}">${ETIQ[id]}${v===true?"":": "+esc(id==="pmax"?num(+v):v)}</button>`}).join("");
+
   const r=ordenar(filtrar());
-  const usd=r.filter(a=>a.precio!=null&&a.moneda==="USD").map(a=>a.precio);
+  const precios=r.filter(a=>a.precio!=null&&a.moneda==="USD").map(a=>a.precio);
   const uh=r.map(usdHa).filter(x=>x!=null);
   const ha=r.map(a=>a.hectareas).filter(Boolean);
-  const res=[`<span><b>${r.length}</b> ${r.length===1?"publicación":"publicaciones"}</span>`];
-  if(usd.length)res.push(`<span>Precio mediano <b>USD ${Math.round(mediana(usd)).toLocaleString("es-AR")}</b></span>`);
-  if(uh.length)res.push(`<span>Mediana por ha <b>USD ${Math.round(mediana(uh)).toLocaleString("es-AR")}</b></span>`);
-  if(ha.length)res.push(`<span><b>${num(ha.reduce((s,x)=>s+x,0))}</b> ha en total</span>`);
-  $("resumen").innerHTML=res.join("");
-  $("lista").innerHTML=r.length?r.slice(0,mostrar).map(tarjeta).join(""):'<p class="vacio">No hay publicaciones con estos filtros.</p>';
+  const st=[`<div class="stat"><span>Publicaciones</span><b>${r.length.toLocaleString("es-AR")}</b></div>`];
+  if(precios.length)st.push(`<div class="stat" title="La mitad de las publicaciones cuesta menos y la mitad más"><span>Precio típico</span><b>${usd(mediana(precios))}</b></div>`);
+  if(uh.length)st.push(`<div class="stat" title="La mitad de los campos cuesta menos por hectárea y la mitad más"><span>Precio típico por ha</span><b>${usd(mediana(uh))}</b></div>`);
+  if(ha.length&&!esCasa)st.push(`<div class="stat"><span>Hectáreas</span><b>${num(ha.reduce((s,x)=>s+x,0))}</b></div>`);
+  $("stats").innerHTML=st.join("");
+
+  $("lista").innerHTML=r.length?r.slice(0,mostrar).map(tarjeta).join("")
+    :`<div class="vacio"><p>No hay publicaciones con estos filtros.</p><button type="button" class="btn" data-limpiar>Limpiar filtros</button></div>`;
   $("mas").hidden=r.length<=mostrar;
-  $("mas").textContent=`Mostrar más (${r.length-mostrar} restantes)`;
+  $("mas").textContent=`Mostrar ${Math.min(PAGINA,r.length-mostrar)} más · quedan ${r.length-mostrar}`;
+}
+
+function limpiar(){
+  CAMPOS.forEach(id=>setVal(id,id==="orden"?"nuevo":""));
+  render();
+}
+
+function pie(j){
+  const activos=DATA.filter(a=>a.activo).length;
+  const fuentes=j.fuentes||[];
+  const malas=fuentes.filter(f=>f.errores);
+  const filas=fuentes.map(f=>`<tr><td>${esc(f.fuente)}</td><td>${esc(f.tipo)}</td><td class="n">${f.leidos}</td><td class="n">${f.en_zona}</td><td>${f.errores?'<span class="err">Con errores</span>':!f.leidos?"Sin avisos":"OK"}</td></tr>`).join("");
+  $("pie").innerHTML=`<p>${activos.toLocaleString("es-AR")} avisos activos de ${DATA.length.toLocaleString("es-AR")} registrados. Los datos se toman de los sitios publicados una vez por día: verificá siempre precio y disponibilidad en la publicación original.</p>`+
+    (fuentes.length?`<details><summary>Estado de las fuentes en la última corrida${malas.length?` · <span class="err">${malas.length} con errores</span>`:""}</summary>
+      <table class="tabla"><thead><tr><th>Fuente</th><th>Búsqueda</th><th class="n">Leídos</th><th class="n">En la zona</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></details>`:"");
 }
 
 fetch("data/listings.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw r;return r.json()}).then(j=>{
-  DATA=j.avisos.map(a=>({...a,_txt:norm(a.titulo+" "+a.ubicacion+" "+a.departamento)}));
-  $("act").textContent="Actualizado el "+new Date(j.actualizado).toLocaleString("es-AR",{dateStyle:"long",timeStyle:"short"})+".";
+  DATA=j.avisos.map(a=>({...a,hectareas:a.hectareas>50000?null:a.hectareas,_txt:norm(a.titulo+" "+a.ubicacion+" "+a.departamento+" "+a.fuente)}));
+  $("act").textContent="Actualizado el "+new Date(j.actualizado).toLocaleString("es-AR",{dateStyle:"long",timeStyle:"short"});
   [...new Set(DATA.map(a=>a.departamento))].sort().forEach(x=>$("depto").add(new Option(x,x)));
-  [...new Set(DATA.map(a=>a.fuente))].sort().forEach(x=>$("fuente").add(new Option(x,x)));
-  const activos=DATA.filter(a=>a.activo).length;
-  const fuentes=(j.fuentes||[]).map(f=>`${esc(f.fuente)} (${esc(f.tipo)}): ${f.en_zona} en la zona de ${f.leidos} leídos`+(f.errores||!f.leidos?' <span class="err">· con problemas</span>':"")).join("<br>");
-  $("pie").innerHTML=`${activos} avisos activos de ${DATA.length} registrados. Los datos se toman de los sitios publicados una vez por día; verificá siempre precio y disponibilidad en la publicación original.`+(fuentes?"<br><br>Última corrida:<br>"+fuentes:"");
+  [...new Set(DATA.map(a=>a.fuente))].sort((a,b)=>a.localeCompare(b,"es")).forEach(x=>$("fuente").add(new Option(x,x)));
+  pie(j);
   leerURL();
+  // Si la URL trae filtros del panel, se muestra abierto
+  if(PANEL.some(id=>val(id)))abrirPanel(true);
   render();
-}).catch(()=>{$("lista").innerHTML='<p class="vacio">Todavía no hay datos. Corré el workflow “Actualización diaria” desde la pestaña Actions.</p>'});
+}).catch(()=>{
+  $("act").textContent="Sin datos";
+  $("lista").innerHTML='<div class="vacio"><p>Todavía no hay datos. Corré el workflow “Actualización diaria” desde la pestaña Actions.</p></div>';
+});
+
+function abrirPanel(abrir){$("panel").hidden=!abrir;$("verFiltros").setAttribute("aria-expanded",abrir)}
 
 let t;
-CAMPOS.forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,["q","pmax","hamin"].includes(i)?150:0)}));
-$("limpiar").addEventListener("click",()=>{CAMPOS.forEach(id=>setVal(id,id==="orden"?"nuevo":""));render()});
+CAMPOS.filter(id=>!(id in S)).forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,["q","pmax","hamin"].includes(i)?200:0)}));
+document.querySelector(".seg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.tipo=b.dataset.tipo;render()});
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b||b.disabled)return;S.subtipo=b.dataset.st;render()});
+$("verFiltros").addEventListener("click",()=>abrirPanel($("panel").hidden));
+$("limpiar").addEventListener("click",limpiar);
+$("lista").addEventListener("click",e=>{if(e.target.closest("[data-limpiar]"))limpiar()});
+$("activos").addEventListener("click",e=>{const b=e.target.closest("[data-quitar]");if(b){setVal(b.dataset.quitar,"");render()}});
 $("mas").addEventListener("click",()=>{mostrar+=PAGINA;render(false)});
+$("arriba").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+addEventListener("scroll",()=>{$("arriba").hidden=scrollY<900},{passive:true});
+addEventListener("keydown",e=>{
+  if(e.key==="/"&&!/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)){e.preventDefault();$("q").focus()}
+  if(e.key==="Escape"&&document.activeElement===$("q")&&$("q").value){$("q").value="";render()}
+});
 </script>
 </body>
 </html>

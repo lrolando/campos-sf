@@ -439,6 +439,7 @@
     },
     {
       "nombre": "Heima Negocios Inmobiliarios",
+      "tipo_sel": ".prop-card-red-text",
       "activo": true,
       "tipo": "todos",
       "urls": ["https://www.grupoheima.com.ar/Venta"],
@@ -455,6 +456,7 @@
     },
     {
       "nombre": "Trivelli-Cremieux C21",
+      "tipo_sel": ".prop-card-red-text",
       "activo": true,
       "tipo": "todos",
       "urls": ["https://www.trivelli-cremieux.com.ar/Venta"],
@@ -484,6 +486,7 @@
     },
     {
       "nombre": "Lorenzetti Propiedades",
+      "tipo_sel": "@class",
       "activo": true,
       "tipo": "todos",
       "urls": ["https://lorenzettipropiedades.com/ventas/"],

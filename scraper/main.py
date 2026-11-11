@@ -66,6 +66,15 @@ def parse_precio(txt):
     return precio, moneda
 
 
+HA_MAXIMAS = 50000  # más que esto es un error de carga (m² escritos como hectáreas)
+
+
+def hectareas_de(txt):
+    """Hectáreas del texto, descartando valores imposibles."""
+    n = parse_hectareas(txt)
+    return n if n and n <= HA_MAXIMAS else None
+
+
 def parse_hectareas(txt):
     m = re.search(r"(\d[\d\.,]*)\s*(?:has?\b|hect[aá]reas?)", txt or "", re.I)
     if not m:
@@ -158,6 +167,38 @@ def permitido(tipo, ubicacion, titulo=""):
 
 CON_HECTAREAS = ("campo",)
 
+# Subtipo de lo urbano ("casa"): casa, departamento, local, galpon u otro. Gana la palabra clave que
+# aparece primero ("Casa con local" es casa, "Local con vivienda" es local). El PH cuenta como departamento.
+SUBTIPOS_CLAVE = [
+    (r"\b(galpon(es)?|depositos?|naves?|tinglados?)\b", "galpon"),
+    (r"\b(local(es)?|salon(es)?[\s_-]+comercial(es)?|fondo[\s_-]+de[\s_-]+comercio)\b", "local"),
+    (r"\b(departamentos?|deptos?|dptos?|monoambientes?|ph)\b", "departamento"),
+    (r"\b(casas?|chalet|duplex|triplex|viviendas?|quintas?|cabanas?)\b", "casa"),
+    (r"\b(lotes?|loteos?|terrenos?)\b", "terreno"),
+    (r"\b(cocheras?|garages?)\b", "cochera"),
+    (r"\b(oficinas?)\b", "oficina"),
+    (r"\b(consultorios?)\b", "consultorio"),
+    (r"\b(edificios?|campos?)\b", "otro"),
+]
+SUBTIPOS = ("casa", "departamento", "local", "galpon", "terreno", "cochera", "oficina", "consultorio", "otro")
+
+
+def subtipo_de(texto):
+    """Subtipo según la primera palabra clave del texto, o None si no hay ninguna."""
+    t = norm(texto)
+    hallados = [(m.start(), st) for pat, st in SUBTIPOS_CLAVE if (m := re.search(pat, t))]
+    return min(hallados, key=lambda x: x[0])[1] if hallados else None
+
+
+def subtipo_real(tipo, raw_tipo_texto, url, titulo):
+    """Subtipo de un aviso urbano. Primero el tipo que da el sitio (API, etiqueta, ficha), después el
+    subdominio de Mercado Libre y por último el título. Los campos no tienen subtipo."""
+    if tipo != "casa":
+        return None
+    sub = re.match(r"https?://([a-z]+)\.mercadolibre", url or "")
+    return (subtipo_de(raw_tipo_texto) or (subtipo_de(sub.group(1)) if sub else None)
+            or subtipo_de(titulo) or "otro")
+
 
 def sel_text(el, css):
     if isinstance(css, list):  # varios selectores: se unen sus textos ("casa • venta" + "Garibaldi 856")
@@ -224,10 +265,15 @@ def leer_tarjeta(site, it, url):
         precio_txt = grupo(site["precio_regex"], texto) or ""
     raw = {"url": href if site.get("conservar_query") else href.split("?")[0],
            "titulo": titulo, "ubicacion": ubicacion, "precio_txt": precio_txt, "texto": texto}
+    if site.get("tipo_sel"):  # etiqueta con el tipo ("Casa", "Galpón")
+        if site["tipo_sel"].startswith("@"):  # "@class": atributo de la propia tarjeta ("es_type-casa")
+            valor = it.get(site["tipo_sel"][1:]) or ""
+            raw["tipo_texto"] = " ".join(valor) if isinstance(valor, list) else valor
+        else:
+            raw["tipo_texto"] = sel_text(it, site["tipo_sel"])
     if site.get("tipo_regex"):  # el tipo sale del título ("Mitre 4050 | Casa en Venta")
-        raw["tipo"] = tipo_de_texto(grupo(site["tipo_regex"], titulo) or "")
-        if not raw["tipo"]:
-            return None
+        raw["tipo_texto"] = grupo(site["tipo_regex"], titulo) or ""
+        raw["tipo"] = tipo_de_texto(raw["tipo_texto"])
     return raw
 
 
@@ -242,9 +288,8 @@ def completar_con_detalle(site, raw):
     if det.get("precio_regex"):
         raw["precio_txt"] = grupo(det["precio_regex"], texto) or ""
     if det.get("tipo_regex"):
-        raw["tipo"] = tipo_de_texto(grupo(det["tipo_regex"], texto) or "")
-        if not raw["tipo"]:
-            return False
+        raw["tipo_texto"] = grupo(det["tipo_regex"], texto) or ""
+        raw["tipo"] = tipo_de_texto(raw["tipo_texto"])
     if det.get("texto_regex"):  # parte de la página que se usa para buscar hectáreas
         raw["texto"] += " " + (grupo(det["texto_regex"], texto) or "")
     return True
@@ -284,6 +329,7 @@ def scrape_api_gaggiotti(site):
             "precio_txt": precio_txt,
             "texto": f"{p.get('surface') or ''} {unidad}",
             "tipo": tipo,
+            "tipo_texto": (p.get("type") or {}).get("name", ""),  # "Casa", "Galpón", "Local"...
         })
     return resultados, errores
 
@@ -360,9 +406,10 @@ def construir(site, raw):
     return {
         "id": id_de(raw["url"]),
         "url": raw["url"], "fuente": site["nombre"], "tipo": tipo,
+        "subtipo": subtipo_real(tipo, raw.get("tipo_texto"), raw["url"], raw["titulo"]),
         "titulo": raw["titulo"], "ubicacion": raw["ubicacion"] or loc.title(),
         "departamento": depto, "precio": precio, "moneda": moneda,
-        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
+        "hectareas": hectareas_de(raw["titulo"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
     }
 
 
@@ -379,9 +426,10 @@ def construir_alerta(raw):
     precio, moneda = parse_precio(raw["precio_txt"])
     return {
         "id": id_de(raw["url"]), "url": raw["url"], "fuente": raw["fuente"], "tipo": tipo, "via": "alerta",
+        "subtipo": subtipo_real(tipo, raw["slug"], raw["url"], raw["titulo"]),
         "titulo": raw["titulo"], "ubicacion": loc.title(), "departamento": depto,
         "precio": precio, "moneda": moneda,
-        "hectareas": parse_hectareas(raw["titulo"] + " " + raw["slug"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
+        "hectareas": hectareas_de(raw["titulo"] + " " + raw["slug"] + " " + raw["texto"]) if tipo in CON_HECTAREAS else None,
     }
 
 
@@ -402,8 +450,8 @@ def registrar(avisos, it, fecha):
         else:
             a.pop("precio_anterior", None)
         a["historial"].append({"fecha": fecha, "precio": it["precio"], "moneda": it["moneda"]})
-    for k in ("titulo", "ubicacion", "departamento", "precio", "moneda", "hectareas"):
-        if it[k] is not None:
+    for k in ("titulo", "ubicacion", "departamento", "precio", "moneda", "hectareas", "subtipo"):
+        if it.get(k) is not None:
             a[k] = it[k]
     a["ultima_vez"], a["activo"] = fecha, True
 
@@ -452,7 +500,13 @@ def sanear_previos(avisos_previos):
             a["departamento"] = depto
         if not permitido(tipo, a.get("ubicacion"), a.get("titulo", "")):
             continue  # p. ej. una casa fuera de Rafaela
-        if tipo not in CON_HECTAREAS:
+        if tipo != "casa":
+            a.pop("subtipo", None)
+        elif a.get("subtipo") not in SUBTIPOS or a["subtipo"] == "otro":
+            # Avisos guardados sin subtipo (o con "otro", que pudo quedar antes de sumar una categoría):
+            # se estima por el título hasta que la próxima lectura del sitio lo corrija con su dato.
+            a["subtipo"] = subtipo_real(tipo, None, a["url"], a["titulo"])
+        if tipo not in CON_HECTAREAS or (a.get("hectareas") or 0) > HA_MAXIMAS:
             a["hectareas"] = None
         if a.get("precio") is not None and a["precio"] < PRECIO_MINIMO:
             a["precio"] = None
