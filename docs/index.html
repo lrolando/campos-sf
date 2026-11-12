@@ -47,6 +47,7 @@ a{color:var(--green)}
 input,select,button{font:inherit;color:var(--ink)}
 input[type=search],input[type=number],select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
 select{cursor:pointer}
+.fila>select{max-width:240px;text-overflow:ellipsis}
 .seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
 .seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:600;font-size:.88rem;white-space:nowrap}
 .seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
@@ -112,19 +113,15 @@ details.hist ol{margin:6px 0 0;padding-left:18px}
 
 /* Pie */
 footer{padding:20px 0 48px;color:var(--muted);font-size:.84rem}
-footer details{margin-top:12px}
-footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
-.tabla{width:100%;border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums}
-.tabla th,.tabla td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
-.tabla th{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
-.tabla td.n,.tabla th.n{text-align:right}
-.err{color:var(--red);font-weight:600}
+.err{color:var(--red)}
+footer summary{cursor:pointer;width:fit-content}
 
 @media (max-width:600px){
   .card{grid-template-columns:1fr;padding:14px}
   .precio{text-align:left;order:-1}
   .seg{flex:1 1 100%}.seg button{flex:1}
   .fila>select,.fila>.btn{flex:1 1 40%}
+  .fila>select{max-width:none}
   .buscar kbd{display:none}
 }
 </style>
@@ -150,14 +147,8 @@ footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
         <button type="button" data-tipo="campo" aria-pressed="false">Campos</button>
         <button type="button" data-tipo="casa" aria-pressed="false">Casas</button>
       </div>
-      <label class="sr" for="orden">Ordenar</label>
-      <select id="orden">
-        <option value="nuevo">Más recientes</option>
-        <option value="precio">Menor precio</option>
-        <option value="precio_desc">Mayor precio</option>
-        <option value="ha" data-campo>Más hectáreas</option>
-        <option value="usdha" data-campo>Menor USD por ha</option>
-      </select>
+      <label class="sr" for="fuente">Fuente</label>
+      <select id="fuente"><option value="">Todas las fuentes</option></select>
       <button type="button" class="btn" id="verFiltros" aria-expanded="false" aria-controls="panel">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
         Filtros <span class="n" id="nFiltros" hidden></span>
@@ -166,7 +157,13 @@ footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
     <div class="chips" id="chips" role="group" aria-label="Tipo de casa" hidden></div>
     <div class="panel" id="panel" hidden>
       <div class="campo" id="campoDepto"><label for="depto">Departamento</label><select id="depto"><option value="">Todos</option></select></div>
-      <div class="campo"><label for="fuente">Fuente</label><select id="fuente"><option value="">Todas</option></select></div>
+      <div class="campo"><label for="orden">Ordenar por</label><select id="orden">
+        <option value="nuevo">Más recientes</option>
+        <option value="precio">Menor precio</option>
+        <option value="precio_desc">Mayor precio</option>
+        <option value="ha" data-campo>Más hectáreas</option>
+        <option value="usdha" data-campo>Menor USD por ha</option>
+      </select></div>
       <div class="campo"><label for="pmax">Precio máximo (USD)</label><input id="pmax" type="number" min="0" step="1000" inputmode="numeric" placeholder="Sin límite"></div>
       <div class="campo" id="campoHa"><label for="hamin">Hectáreas mínimas</label><input id="hamin" type="number" min="0" step="1" inputmode="numeric" placeholder="Cualquiera"></div>
       <div class="checks">
@@ -305,7 +302,8 @@ function render(reiniciar=true){
   guardarURL();
 
   const activos=PANEL.filter(id=>{const v=val(id);return v&&!(esCasa&&(id==="hamin"||id==="depto"))});
-  $("nFiltros").hidden=!activos.length;$("nFiltros").textContent=activos.length;
+  const enPanel=activos.filter(id=>id!=="fuente").length;  // la fuente está en la barra, no dentro de "Filtros"
+  $("nFiltros").hidden=!enPanel;$("nFiltros").textContent=enPanel;
   $("activos").innerHTML=activos.map(id=>{const v=val(id);return `<button type="button" data-quitar="${id}">${ETIQ[id]}${v===true?"":": "+esc(id==="pmax"?num(+v):v)}</button>`}).join("");
 
   const r=ordenar(filtrar());
@@ -333,11 +331,9 @@ function limpiar(){
 function pie(j){
   const activos=DATA.filter(a=>a.activo).length;
   const fuentes=j.fuentes||[];
-  const malas=fuentes.filter(f=>f.errores);
-  const filas=fuentes.map(f=>`<tr><td>${esc(f.fuente)}</td><td>${esc(f.tipo)}</td><td class="n">${f.leidos}</td><td class="n">${f.en_zona}</td><td>${f.errores?'<span class="err">Con errores</span>':!f.leidos?"Sin avisos":"OK"}</td></tr>`).join("");
+  const lineas=fuentes.map(f=>`${esc(f.fuente)} (${esc(f.tipo)}): ${f.en_zona} en la zona de ${f.leidos} leídos`+(f.errores||!f.leidos?' <span class="err">· con problemas</span>':"")).join("<br>");
   $("pie").innerHTML=`<p>${activos.toLocaleString("es-AR")} avisos activos de ${DATA.length.toLocaleString("es-AR")} registrados. Los datos se toman de los sitios publicados una vez por día: verificá siempre precio y disponibilidad en la publicación original.</p>`+
-    (fuentes.length?`<details><summary>Estado de las fuentes en la última corrida${malas.length?` · <span class="err">${malas.length} con errores</span>`:""}</summary>
-      <table class="tabla"><thead><tr><th>Fuente</th><th>Búsqueda</th><th class="n">Leídos</th><th class="n">En la zona</th><th>Estado</th></tr></thead><tbody>${filas}</tbody></table></details>`:"");
+    (lineas?`<details><summary>Última corrida</summary><p>${lineas}</p></details>`:"");
 }
 
 fetch("data/listings.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw r;return r.json()}).then(j=>{
@@ -348,14 +344,23 @@ fetch("data/listings.json",{cache:"no-cache"}).then(r=>{if(!r.ok)throw r;return 
   pie(j);
   leerURL();
   // Si la URL trae filtros del panel, se muestra abierto
-  if(PANEL.some(id=>val(id)))abrirPanel(true);
+  if(PANEL.some(id=>id!=="fuente"&&val(id)))abrirPanel(true);
   render();
 }).catch(()=>{
   $("act").textContent="Sin datos";
   $("lista").innerHTML='<div class="vacio"><p>Todavía no hay datos. Corré el workflow “Actualización diaria” desde la pestaña Actions.</p></div>';
 });
 
-function abrirPanel(abrir){$("panel").hidden=!abrir;$("verFiltros").setAttribute("aria-expanded",abrir)}
+let scrollAlAbrir=0;
+function abrirPanel(abrir){$("panel").hidden=!abrir;$("verFiltros").setAttribute("aria-expanded",abrir);scrollAlAbrir=scrollY}
+// En el celular el panel abierto tapa casi toda la pantalla: se cierra solo al desplazarse por la lista.
+// No se cierra mientras se escribe en un campo del panel (el teclado del celular también mueve la página).
+const MOVIL=matchMedia("(max-width:600px)");
+function cerrarAlDesplazar(){
+  const escribiendo=document.activeElement.tagName==="INPUT"&&$("panel").contains(document.activeElement)&&document.activeElement.type!=="checkbox";
+  if($("panel").hidden||!MOVIL.matches||escribiendo)return;
+  if(Math.abs(scrollY-scrollAlAbrir)>60)abrirPanel(false);
+}
 
 let t;
 CAMPOS.filter(id=>!(id in S)).forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(render,["q","pmax","hamin"].includes(i)?200:0)}));
@@ -367,7 +372,7 @@ $("lista").addEventListener("click",e=>{if(e.target.closest("[data-limpiar]"))li
 $("activos").addEventListener("click",e=>{const b=e.target.closest("[data-quitar]");if(b){setVal(b.dataset.quitar,"");render()}});
 $("mas").addEventListener("click",()=>{mostrar+=PAGINA;render(false)});
 $("arriba").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-addEventListener("scroll",()=>{$("arriba").hidden=scrollY<900},{passive:true});
+addEventListener("scroll",()=>{$("arriba").hidden=scrollY<900;cerrarAlDesplazar()},{passive:true});
 addEventListener("keydown",e=>{
   if(e.key==="/"&&!/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)){e.preventDefault();$("q").focus()}
   if(e.key==="Escape"&&document.activeElement===$("q")&&$("q").value){$("q").value="";render()}
