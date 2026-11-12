@@ -132,7 +132,7 @@ footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
 <body>
 <header class="wrap cab">
   <h1>Campos y casas en venta</h1>
-  <p>Campos en Castellanos, Las Colonias, San Cristóbal y San Martín. En Rafaela, todas las propiedades en venta: casas, departamentos, terrenos, locales, galpones y más.</p>
+  <p>Campos en Castellanos, Las Colonias, San Cristóbal y San Martín<br> Casas en Rafaela</p>
   <div class="act" id="act">Cargando datos…</div>
 </header>
 
@@ -165,7 +165,7 @@ footer summary{cursor:pointer;font-weight:600;color:var(--ink)}
     </div>
     <div class="chips" id="chips" role="group" aria-label="Tipo de casa" hidden></div>
     <div class="panel" id="panel" hidden>
-      <div class="campo"><label for="depto">Departamento</label><select id="depto"><option value="">Todos</option></select></div>
+      <div class="campo" id="campoDepto"><label for="depto">Departamento</label><select id="depto"><option value="">Todos</option></select></div>
       <div class="campo"><label for="fuente">Fuente</label><select id="fuente"><option value="">Todas</option></select></div>
       <div class="campo"><label for="pmax">Precio máximo (USD)</label><input id="pmax" type="number" min="0" step="1000" inputmode="numeric" placeholder="Sin límite"></div>
       <div class="campo" id="campoHa"><label for="hamin">Hectáreas mínimas</label><input id="hamin" type="number" min="0" step="1" inputmode="numeric" placeholder="Cualquiera"></div>
@@ -233,7 +233,8 @@ function leerURL(){
 }
 
 function filtrar(conSubtipo=true){
-  const q=norm(val("q")).split(/\s+/).filter(Boolean),t=val("tipo"),d=val("depto"),f=val("fuente");
+  const q=norm(val("q")).split(/\s+/).filter(Boolean),t=val("tipo"),f=val("fuente");
+  const d=t==="casa"?"":val("depto");  // las casas son todas de Rafaela: el departamento no aplica
   const st=conSubtipo&&t==="casa"?val("subtipo"):"";  // el subtipo solo aplica a Rafaela
   const pmax=+val("pmax")||0,hamin=t==="casa"?0:+val("hamin")||0;
   return DATA.filter(a=>(!t||a.tipo===t)&&(!st||subtipo(a)===st)&&(!d||a.departamento===d)&&(!f||a.fuente===f)
@@ -295,6 +296,7 @@ function render(reiniciar=true){
   document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tipo===t));
   $("chips").hidden=!esCasa;
   $("campoHa").hidden=esCasa;
+  $("campoDepto").hidden=esCasa;
   // Ordenar por hectáreas no tiene sentido en Rafaela
   document.querySelectorAll("#orden option[data-campo]").forEach(o=>o.hidden=esCasa);
   if(esCasa&&["ha","usdha"].includes(val("orden")))setVal("orden","nuevo");
@@ -302,7 +304,7 @@ function render(reiniciar=true){
   if(reiniciar)mostrar=PAGINA;
   guardarURL();
 
-  const activos=PANEL.filter(id=>{const v=val(id);return v&&!(id==="hamin"&&esCasa)});
+  const activos=PANEL.filter(id=>{const v=val(id);return v&&!(esCasa&&(id==="hamin"||id==="depto"))});
   $("nFiltros").hidden=!activos.length;$("nFiltros").textContent=activos.length;
   $("activos").innerHTML=activos.map(id=>{const v=val(id);return `<button type="button" data-quitar="${id}">${ETIQ[id]}${v===true?"":": "+esc(id==="pmax"?num(+v):v)}</button>`}).join("");
 
