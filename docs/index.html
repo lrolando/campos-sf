@@ -309,12 +309,10 @@ function render(reiniciar=true){
   const r=ordenar(filtrar());
   const precios=r.filter(a=>a.precio!=null&&a.moneda==="USD").map(a=>a.precio);
   const uh=r.map(usdHa).filter(x=>x!=null);
-  const ha=r.map(a=>a.hectareas).filter(Boolean);
   const st=[`<div class="stat"><span>Publicaciones</span><b>${r.length.toLocaleString("es-AR")}</b></div>`];
-  // Con "Todo" se mezclan campos y casas: los precios y hectáreas juntos no dicen nada, así que no se muestran.
-  if(t&&precios.length)st.push(`<div class="stat" title="La mitad de las publicaciones cuesta menos y la mitad más"><span>Precio típico</span><b>${usd(mediana(precios))}</b></div>`);
-  if(t&&uh.length)st.push(`<div class="stat" title="La mitad de los campos cuesta menos por hectárea y la mitad más"><span>Precio típico por ha</span><b>${usd(mediana(uh))}</b></div>`);
-  if(t==="campo"&&ha.length)st.push(`<div class="stat"><span>Hectáreas</span><b>${num(ha.reduce((s,x)=>s+x,0))}</b></div>`);
+  // Con "Todo" se mezclan campos y casas y los precios juntos no dicen nada. Campos: solo precio por ha; casas: solo precio.
+  if(t==="casa"&&precios.length)st.push(`<div class="stat" title="La mitad de las publicaciones cuesta menos y la mitad más"><span>Precio típico</span><b>${usd(mediana(precios))}</b></div>`);
+  if(t==="campo"&&uh.length)st.push(`<div class="stat" title="La mitad de los campos cuesta menos por hectárea y la mitad más"><span>Precio típico por ha</span><b>${usd(mediana(uh))}</b></div>`);
   $("stats").innerHTML=st.join("");
 
   $("lista").innerHTML=r.length?r.slice(0,mostrar).map(tarjeta).join("")
